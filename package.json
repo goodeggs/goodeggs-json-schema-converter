@@ -1,0 +1,37 @@
+{
+  "name": "goodeggs-json-schema-converter",
+  "version": "1.0.0",
+  "description": "convert json schemas to mongoose schemas using good eggs best practices",
+  "author": "Good Eggs <open-source@goodeggs.com>",
+  "contributors": [
+    "dannynelson <danny@goodeggs.com>"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "JSONSchema"
+  ],
+  "main": "lib/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/goodeggs/goodeggs-json-schema-converter.git"
+  },
+  "homepage": "https://github.com/goodeggs/goodeggs-json-schema-converter",
+  "bugs": "https://github.com/goodeggs/goodeggs-json-schema-converter/issues",
+  "dependencies": {},
+  "devDependencies": {
+    "chai": "~1.x.x",
+    "coffee-script": ">=1.8.x",
+    "mocha": "~1.x.x",
+    "mocha-sinon": "~1.x.x",
+    "mongoose": "^4.0.7"
+  },
+  "scripts": {
+    "compile": "coffee --bare --compile --output lib/ src/",
+    "prepublish": "npm run compile",
+    "pretest": "npm run compile",
+    "test": "mocha"
+  },
+  "publishConfig": {
+    "registry": "http://registry.npmjs.org"
+  }
+}
