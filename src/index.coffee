@@ -8,11 +8,6 @@ module.exports.toMongooseSchema = (JSONSchema, mongoose) ->
   formats =
     "objectid": -> mongoose.Schema.ObjectId
     "date-time": -> Date
-    "cents": ->
-      if mongoose.Schema.Types.Cents?
-        return mongoose.Schema.Types.Cents
-      else
-        throw new Error('schema type "Cents" not available, please extend mongoose if you want to use this schema type')
 
   propertiesMappings =
     "enum":  "enum"
@@ -24,18 +19,27 @@ module.exports.toMongooseSchema = (JSONSchema, mongoose) ->
     if JSONSchemaConfig.type is 'object'
       mongooseConfig = {}
       for property, childJSONSchemaConfig of JSONSchemaConfig.properties
-        isRequired = JSONSchemaConfig.required?.length and property in JSONSchemaConfig.required
-        mongooseConfig[property] = convert(childJSONSchemaConfig, isRequired)
+        unless property is '__v'
+          isRequired = JSONSchemaConfig.required?.length and property in JSONSchemaConfig.required
+          mongooseConfig[property] = convert(childJSONSchemaConfig, isRequired)
       return mongooseConfig
+
     else if JSONSchemaConfig.type is 'array'
+
+      # array of documents w/o _id
       if JSONSchemaConfig.items.type is 'object' and not JSONSchemaConfig.items.properties._id?
         delete JSONSchemaConfig.items.properties._id
         return [new mongoose.Schema(convert(JSONSchemaConfig.items), {_id: false})]
+
+      # array of documents w/ _id
       else if JSONSchemaConfig.items.type is 'object'
         return [new mongoose.Schema(convert(JSONSchemaConfig.items))]
+
+      # array of primitives
       else
         return [convert(JSONSchemaConfig.items)]
-    else
+
+    else # primitives
       mongooseConfig = {}
       mongooseConfig.type = types[JSONSchemaConfig.type]
       mongooseConfig.type = formats[JSONSchemaConfig.format]() if formats[JSONSchemaConfig.format]?()
@@ -46,6 +50,7 @@ module.exports.toMongooseSchema = (JSONSchema, mongoose) ->
 
   if not JSONSchema.properties._id?
     config = {_id: false}
+
   else
     delete JSONSchema.properties._id
     config = {}
