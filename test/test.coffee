@@ -9,7 +9,8 @@ describe 'toMongooseSchema', ->
       required: ['name']
       properties:
         name: {type: 'string'}
-        age: {type: 'number', minimum: 1, maximum: 100}
+        # null ignored, b/c any value can be set to null with mongoose
+        age: {type: ['number', 'null'], minimum: 1, maximum: 100}
         subscribed: {type: 'boolean', default: false}
         role: {type: 'string', enum: ['manager', 'employee']}
         badges:
@@ -28,3 +29,10 @@ describe 'toMongooseSchema', ->
     expect(result.tree.role).to.deep.equal { type: String, enum: ['manager', 'employee'] }
     expect(result.tree.badges[0].tree._id).not.to.be.ok
     expect(result.tree.badges[0].tree.number).to.deep.equal { type: Number, required: true }
+
+  it 'throws if setting an array of types', ->
+    schema =
+      type: 'object'
+      properties:
+        age: {type: ['number', 'null', 'string']}
+    expect(-> converter.toMongooseSchema(schema, mongoose)).to.throw 'Arrays with multiple types'

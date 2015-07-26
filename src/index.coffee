@@ -16,7 +16,16 @@ module.exports.toMongooseSchema = (JSONSchema, mongoose) ->
     "minimum":  "min"
 
   convert = (JSONSchemaConfig, required = false) ->
-    if JSONSchemaConfig.type is 'object'
+    JSONSchemaConfigType =
+      if Array.isArray(JSONSchemaConfig.type) and JSONSchemaConfig.type.length is 2 and 'null' in JSONSchemaConfig.type
+        JSONSchemaConfig.type.splice(JSONSchemaConfig.type.indexOf('null'), 1)
+        JSONSchemaConfig.type[0]
+      else if Array.isArray(JSONSchemaConfig.type)
+        throw new Error "Cannot convert type: [#{JSONSchemaConfig.type}]. Arrays with multiple types (except for arrays of 2 with a single 'null') are not supported by json schema converter"
+      else
+        JSONSchemaConfig.type
+
+    if JSONSchemaConfigType is 'object'
       mongooseConfig = {}
       for property, childJSONSchemaConfig of JSONSchemaConfig.properties
         unless property is '__v'
@@ -24,7 +33,7 @@ module.exports.toMongooseSchema = (JSONSchema, mongoose) ->
           mongooseConfig[property] = convert(childJSONSchemaConfig, isRequired)
       return mongooseConfig
 
-    else if JSONSchemaConfig.type is 'array'
+    else if JSONSchemaConfigType is 'array'
 
       # array of documents w/o _id
       if JSONSchemaConfig.items.type is 'object' and not JSONSchemaConfig.items.properties._id?
@@ -41,7 +50,7 @@ module.exports.toMongooseSchema = (JSONSchema, mongoose) ->
 
     else # primitives
       mongooseConfig = {}
-      mongooseConfig.type = types[JSONSchemaConfig.type]
+      mongooseConfig.type = types[JSONSchemaConfigType]
       mongooseConfig.type = formats[JSONSchemaConfig.format]() if formats[JSONSchemaConfig.format]?()
       mongooseConfig.required = true if required
       for jsonSchemaProperty, mongooseProperty of propertiesMappings
