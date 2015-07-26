@@ -1,6 +1,6 @@
 {
   "name": "goodeggs-json-schema-converter",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "convert json schemas to mongoose schemas using good eggs best practices",
   "author": "Good Eggs <open-source@goodeggs.com>",
   "contributors": [
