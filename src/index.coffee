@@ -1,4 +1,6 @@
-module.exports.toMongooseSchema = (JSONSchema, mongoose) ->
+module.exports.toMongooseSchema = (originalJSONSchema, mongoose) ->
+  JSONSchema = JSON.parse JSON.stringify originalJSONSchema # clone
+
   types =
     "string": String
     "integer": Number
